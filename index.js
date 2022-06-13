@@ -4,7 +4,7 @@ const rwClient = require("./twitterClient.js");
 const fs = require('fs');
 var CronJob = require('cron').CronJob;
 
-async function captureImages(date) {
+async function captureImages() {
     let paths = [];
     const cameras = ["#tnLounge", "#tnDining", "#tnBedroom", "#tnGames", "#tnMusic", "#tnBedroom2"];
     const edgeUrl = 'https://www.theedge.co.nz/home/win/2022/05/win--register-for-the-edge--50k-flatmate-with-dosh.html';
@@ -56,7 +56,8 @@ const tweet = async(paths) => {
   console.log("Posting images to Twitter...");
   let selectedPaths = paths.sort(() => 0.5 - Math.random()).slice(0, 4);
   const mediaIds = await Promise.all(selectedPaths.map(path => rwClient.v1.uploadMedia(`./${path}`)));
-  await rwClient.v1.tweet(`${getDateString()}`, { media_ids: mediaIds });
+  const date = getDateString();
+  await rwClient.v1.tweet(`${date}`, { media_ids: mediaIds });
 
   console.log("Cleaning up images...");
   paths.forEach(path => {
@@ -67,18 +68,17 @@ const tweet = async(paths) => {
 };
 
 function getDateString() {
-  const dateString = new Date().toDateString();
-  const hours = `${new Date().getHours()}`;
-  const minutes = new Date().getMinutes < 10 ? `0${new Date().getMinutes()}` : `${new Date().getMinutes}`;
-  const dateTime = `${dateString} ${hours}:${minutes}`;
-  return dateTime;
+  let minutes = parseInt(new Date().getMinutes());
+  if (minutes < 10) {
+    minutes = `0${new Date().getMinutes()}`;
+  }
+  return `${new Date().toDateString()} ${new Date().getHours()}:${minutes}`;
 }
   
 async function main() {
   console.log(getDateString());
-  paths = await captureImages(date);
+  paths = await captureImages();
   await tweet(paths);
-  
 }
 
 const job = new CronJob("0 * * * *", () => {
@@ -89,6 +89,6 @@ const job = new CronJob("0 * * * *", () => {
   }
 });
 
-job.start();
+//job.start();
 
-//main();
+main();
