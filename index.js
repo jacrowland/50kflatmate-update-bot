@@ -89,6 +89,6 @@ const job = new CronJob("0 * * * *", () => {
   }
 });
 
-//job.start();
+job.start();
 
-main();
+//main();
