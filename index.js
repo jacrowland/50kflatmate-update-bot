@@ -20,6 +20,10 @@ async function captureImages() {
     const page = await browser.newPage();
     await page.waitForTimeout(10000);
 
+    const header = await page.$('#headerTitle');
+    const title = await header.getProperty('innerHTML');
+    console.log(title._remoteObject.value);    
+
     page.setViewport({width: 1920, height: 1080});
 
     console.log("Loading page...")
@@ -49,18 +53,18 @@ async function captureImages() {
     }
     await browser.close();
 
-    return paths;
+    return {paths: paths, title:title};
   };
 
-const tweet = async(paths) => {
+const tweet = async(obj) => {
   console.log("Posting images to Twitter...");
-  let selectedPaths = paths.sort(() => 0.5 - Math.random()).slice(0, 4);
+  let selectedPaths = obj.paths.sort(() => 0.5 - Math.random()).slice(0, 4);
   const mediaIds = await Promise.all(selectedPaths.map(path => rwClient.v1.uploadMedia(`./${path}`)));
   const date = getDateString();
-  await rwClient.v1.tweet(`${date}`, { media_ids: mediaIds });
+  await rwClient.v1.tweet(`${date}\n${obj.title}\nWatch live @ http://theedge.co.nz`, { media_ids: mediaIds });
 
   console.log("Cleaning up images...");
-  paths.forEach(path => {
+  obj.paths.forEach(path => {
     fs.unlinkSync(path);
   });
 
