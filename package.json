@@ -1,0 +1,20 @@
+{
+  "name": "puppet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "node index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cron": "^2.0.0",
+    "dotenv": "^16.0.1",
+    "puppeteer": "^14.3.0",
+    "puppeteer-extra-plugin-adblocker": "^2.12.0",
+    "twitter-api-client": "^1.5.2",
+    "twitter-api-v2": "^1.12.2"
+  }
+}
