@@ -21,9 +21,14 @@ async function captureImages() {
     await page.waitForTimeout(10000);
 
     const header = await page.$('#headerTitle');
-    const title = await header.getProperty('innerHTML');
-    console.log(title._remoteObject.value);    
-
+    let = title = '50k Flatmate Update';
+    try {
+      title = await header.getProperty('innerHTML');
+      console.log(title._remoteObject.value);    
+    } catch(err) {
+      console.log(err);
+    }
+    
     page.setViewport({width: 1920, height: 1080});
 
     console.log("Loading page...")
@@ -39,7 +44,7 @@ async function captureImages() {
           await page.click('#player > div.jw-wrapper.jw-reset > div.jw-media.jw-reset > video'); // focus video player
         }
         await page.click('#player > div.jw-wrapper.jw-reset > div.jw-media.jw-reset > video'); // unpause the video player
-        await page.waitForTimeout(4000);
+        await page.waitForTimeout(5000);
 
         let videoPlayer = await page.$('#player > div.jw-wrapper.jw-reset > div.jw-media.jw-reset > video'); 
         let path = `images/${camera}.png`;
@@ -61,7 +66,7 @@ const tweet = async(obj) => {
   let selectedPaths = obj.paths.sort(() => 0.5 - Math.random()).slice(0, 4);
   const mediaIds = await Promise.all(selectedPaths.map(path => rwClient.v1.uploadMedia(`./${path}`)));
   const date = getDateString();
-  await rwClient.v1.tweet(`${date}\n${obj.title}\nWatch live @ http://theedge.co.nz`, { media_ids: mediaIds });
+  await rwClient.v1.tweet(`${date}\nWatch live @ http://theedge.co.nz`, { media_ids: mediaIds });
 
   console.log("Cleaning up images...");
   obj.paths.forEach(path => {
@@ -90,9 +95,10 @@ const job = new CronJob("0 * * * *", () => {
     main();
   } catch(err) {
     console.log(err);
+    job.start();
   }
 });
 
 job.start();
 
-//main();
+main();
