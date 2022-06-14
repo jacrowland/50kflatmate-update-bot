@@ -18,22 +18,22 @@ async function captureImages() {
       })
 
     const page = await browser.newPage();
+    await page.goto(edgeUrl);
     await page.waitForTimeout(10000);
-
-    const header = await page.$('#headerTitle');
-    let = title = '50k Flatmate Update';
-    try {
-      title = await header.getProperty('innerHTML');
-      console.log(title._remoteObject.value);    
-    } catch(err) {
-      console.log(err);
-    }
     
     page.setViewport({width: 1920, height: 1080});
 
     console.log("Loading page...")
 
-    await page.goto(edgeUrl);
+    const header = await page.$('#headerTitle');
+    console.log("Fetching title...");
+    let = title = '50k Flatmate Update';
+    try {
+      properties = await header.getProperty('innerHTML');
+      title = properties._remoteObject.value;
+    } catch(err) {
+      console.log(err);
+    }
 
     for (let i = 0; i < cameras.length; i++) {
       let camera = cameras[i];
@@ -57,19 +57,18 @@ async function captureImages() {
       }
     }
     await browser.close();
-
     return {paths: paths, title:title};
   };
 
-const tweet = async(obj) => {
+const tweet = async(paths, title) => {
   console.log("Posting images to Twitter...");
-  let selectedPaths = obj.paths.sort(() => 0.5 - Math.random()).slice(0, 4);
+  let selectedPaths = paths.sort(() => 0.5 - Math.random()).slice(0, 4);
   const mediaIds = await Promise.all(selectedPaths.map(path => rwClient.v1.uploadMedia(`./${path}`)));
   const date = getDateString();
-  await rwClient.v1.tweet(`${date}\nWatch live @ http://theedge.co.nz`, { media_ids: mediaIds });
+  await rwClient.v1.tweet(`${date}\n\n${title}\n\nWatch live @ http://theedge.co.nz`, { media_ids: mediaIds });
 
   console.log("Cleaning up images...");
-  obj.paths.forEach(path => {
+  paths.forEach(path => {
     fs.unlinkSync(path);
   });
 
@@ -86,8 +85,9 @@ function getDateString() {
   
 async function main() {
   console.log(getDateString());
-  paths = await captureImages();
-  await tweet(paths);
+  const {paths, title} = await captureImages();
+  console.log(title);
+  await tweet(paths, title);
 }
 
 const job = new CronJob("0 * * * *", () => {
