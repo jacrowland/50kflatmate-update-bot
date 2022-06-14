@@ -106,3 +106,5 @@ const job = new CronJob("0 * * * *", () => {
 });
 
 job.start();
+
+console.log("50kFlatemate - Cron Job Started...");
