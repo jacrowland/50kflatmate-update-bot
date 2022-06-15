@@ -20,11 +20,7 @@ async function captureEachCamera(page, cameras) {
     console.log(`Capturing ${camera}`);
     try {
       await page.click(camera);
-      /*
-      if (i !== 0) {
-        await page.click('#player > div.jw-wrapper.jw-reset > div.jw-media.jw-reset > video'); // focus video player
-      }
-      */
+      await page.click('#player > div.jw-wrapper.jw-reset > div.jw-media.jw-reset > video'); // focus video player
       await page.click(
         "#player > div.jw-wrapper.jw-reset > div.jw-media.jw-reset > video"
       ); // unpause the video player
@@ -74,9 +70,10 @@ async function scrapePage(cameras) {
   });
   const page = await browser.newPage();
   await page.goto(edgeUrl);
-  await page.waitForTimeout(10000);
+  await page.waitForTimeout(30000);
   page.setViewport({ width: 1920, height: 1080 });
   console.log("Loading page...");
+  await page.waitForTimeout(10000);
   let title = await getPageHeader(page);
   console.log(title);
   let paths = await captureEachCamera(page, cameras);
@@ -111,28 +108,20 @@ async function main() {
   deleteImages(paths);
 }
 
-// Half hourly updates from 8am to 10pm
-const dayJob = new CronJob("0,30 8-22 * * *", () => {
+const cronString = "59 * * * *";
+
+// Half hourly updates
+const job = new CronJob(cronString, () => {
   try {
     main();
   } catch (err) {
     console.log(err);
-    dayJob.start(); // attempt restart if the job crashes
+    job.start(); // attempt restart if the job crashes
   }
 });
 
-// Hourly updates between from 11pm to 7am
-const nightJob = new CronJob("0 1-7,23 * * *", () => {
-  try {
-    main();
-    
-  } catch (err) {
-    console.log(err);
-    nightJob.start(); // attempt restart if the job crashes
-  }
-});
-
-dayJob.start();
+job.start();
 console.log("50kFlatemate - Day Cron Job Started...");
-nightJob.start();
-console.log("50kFlatemate - Evening Cron Job Started...");
+console.log(cronString);
+
+//main();
