@@ -70,7 +70,7 @@ async function scrapePage(cameras) {
   });
   const page = await browser.newPage();
   await page.goto(edgeUrl);
-  await page.waitForTimeout(30000);
+  await page.waitForTimeout(70000);
   page.setViewport({ width: 1920, height: 1080 });
   console.log("Loading page...");
   await page.waitForTimeout(10000);
